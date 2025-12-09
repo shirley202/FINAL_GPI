@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+}
+
+h2 {
+    text-align: center;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    margin: 25px auto;
+    width: 70%;
+    border-radius: 8px;
+    box-shadow: 0px 0px 6px #aaa;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+button {
+    padding: 8px 15px;
+    cursor: pointer;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: #004d99;
+}
+
+input[type="file"] {
+    margin-bottom: 10px;
+}

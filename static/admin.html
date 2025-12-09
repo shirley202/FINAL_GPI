@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administración – Chatbot Normativo FCyT</title>
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+
+<h2>Panel Administrativo – Documentos Normativos</h2>
+
+<section id="upload-section">
+    <h3>Agregar nuevo PDF</h3>
+    <input type="file" id="upload-file">
+    <button onclick="uploadPDF()">Subir PDF</button>
+</section>
+
+<hr>
+
+<section>
+    <h3>Documentos en el sistema</h3>
+    <table id="docs-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Tamaño</th>
+                <th>Modificado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="docs-body"></tbody>
+    </table>
+</section>
+
+<!-- PANEL DE REEMPLAZO -->
+<div id="replace-box" style="
+    display:none; 
+    margin-top:20px; 
+    padding:15px; 
+    border:2px solid #444; 
+    border-radius:8px;
+    width: 60%;
+    background: #f5f5f5;
+">
+    <h3>Reemplazar documento</h3>
+
+    <p id="replace-target" style="font-weight:bold;"></p>
+
+    <input type="file" id="replace-file">
+    
+    <br><br>
+
+    <button onclick="confirmReplace()">Confirmar reemplazo</button>
+    <button onclick="cancelReplace()">Cancelar</button>
+</div>
+
+<script src="/static/admin.js"></script>
+
+</body>
+</html>
