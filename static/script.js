@@ -1,67 +1,44 @@
-// ===============================
-//  Enviar pregunta al chatbot
-// ===============================
 async function sendMessage() {
     const input = document.getElementById("user-input");
-    const text = input.value.trim();
+    const question = input.value.trim();
 
-    if (!text) return;
+    if (!question) return;
 
-    addMessage("usuario", text);
+    // Mostrar mensaje del usuario
+    appendMessage("user", question);
+
+    // Limpiar input
     input.value = "";
 
-    // Llamada al backend
+    // Enviar al backend
     const res = await fetch("/ask", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: text })
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query: question})
     });
 
     const data = await res.json();
 
-    // Mostrar respuesta enriquecida
-    addMessage("bot", formatearRespuesta(data));
-}
+    // === Nuevo formato de respuesta ===
+    const respuesta = `
+        <strong>Artículo:</strong> ${data.articulo}<br>
+        <strong>Fuente:</strong> ${data.fuente}<br>
+        <strong>Página:</strong> ${data.pagina}<br><br>
 
-
-// ===============================
-//  Formatear la respuesta enriquecida
-// ===============================
-function formatearRespuesta(r) {
-    let html = `
-        <div class="respuesta-enriquecida">
-            <strong>Respuesta resumida:</strong><br>
-            ${r.respuesta}<br><br>
-
-            <strong>Artículo identificado:</strong><br>
-            ${r.articulo}<br><br>
-
-            <strong>Fuente:</strong><br>
-            ${r.fuente}<br><br>
-
-            <strong>Fragmento original (evidencia):</strong><br>
-            <div class="fragmento">
-                ${r.fragmento_original}
-            </div><br>
-
-            <small>Score: ${r.score.toFixed(3)}</small>
-        </div>
+        <strong>Fragmento original:</strong><br>
+        ${data.fragmento_original}
     `;
 
-    return html;
+    appendMessage("bot", respuesta);
 }
 
+function appendMessage(sender, text) {
+    const chatWindow = document.getElementById("chat-window");
 
-// ===============================
-//  Mostrar mensajes en el chat
-// ===============================
-function addMessage(remitente, texto) {
-    const chat = document.getElementById("chat-window");
+    const msg = document.createElement("div");
+    msg.className = sender === "user" ? "user-message" : "bot-message";
+    msg.innerHTML = text;
 
-    const div = document.createElement("div");
-    div.className = "msg " + remitente;
-    div.innerHTML = texto;
-
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+    chatWindow.appendChild(msg);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }

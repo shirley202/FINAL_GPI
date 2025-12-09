@@ -1,15 +1,15 @@
 import os
 import re
-import unicodedata
 import json
 import pickle
+import unicodedata
 import numpy as np
 import pypdf
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sentence_transformers import SentenceTransformer
 
 # ============================
-# CONFIGURACIÓN GENERAL
+# CONFIGURACIÓN
 # ============================
 PDF_DIR = "docs"
 INDEX_DIR = "index_data"
@@ -23,12 +23,12 @@ META_FILE = os.path.join(INDEX_DIR, "metadata.json")
 EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 embedder = SentenceTransformer(EMBED_MODEL)
 
+
 # ============================
-# NORMALIZACIÓN AVANZADA
+# NORMALIZACIÓN
 # ============================
-def normalizar(texto):
-    """Limpieza profunda para mejorar embeddings & TF-IDF."""
-    texto = texto.replace("\n", " ").replace("\r", " ")
+def normalizar(texto: str) -> str:
+    """Limpia texto para embeddings."""
     texto = texto.lower()
     texto = "".join(
         c for c in unicodedata.normalize("NFD", texto)
@@ -40,128 +40,106 @@ def normalizar(texto):
 
 
 # ============================
-# EXTRAER TEXTO DE PDF
+# EXTRAER PÁGINAS COMPLETAS
 # ============================
-def extraer_texto(pdf_path):
+def extraer_paginas(pdf_path):
     reader = pypdf.PdfReader(pdf_path)
-    texto = ""
-    for p in reader.pages:
+    paginas = []
+
+    for num, page in enumerate(reader.pages):
         try:
-            extraido = p.extract_text()
-            if extraido:
-                texto += extraido + "\n"
+            texto = page.extract_text()
+            if texto:
+                paginas.append({"pagina": num + 1, "texto": texto})
         except:
             continue
-    return texto
+
+    return paginas
 
 
 # ============================
-# DETECTAR ESTRUCTURA NORMATIVA
+# CHUNKING INTELIGENTE
 # ============================
 PATRON = re.compile(
-    r"(cap[ií]tulo\s+\w+|t[ií]tulo\s+\w+|secci[oó]n\s+\w+|art[íi]culo\s+\d+|art\.\s*\d+)",
+    r"(cap[íi]tulo\s+[^\n]+|art[íi]culo\s+\d+º?|art\.\s*\d+|secci[oó]n\s+[^\n]+|t[íi]tulo\s+[^\n]+)",
     re.IGNORECASE
 )
 
-def dividir_por_estructura(texto):
-    texto = texto.replace("\r", "").strip()
-    partes = re.split(PATRON, texto)
-
+def dividir_por_articulos(paginas):
+    """Divide cada página en chunks estructurados."""
     chunks = []
 
-    # estructura: [basura, "Artículo 1", texto1, "Artículo 2", texto2, ...]
-    for i in range(1, len(partes), 2):
-        etiqueta = partes[i].strip()
-        contenido = partes[i+1].strip() if i+1 < len(partes) else ""
+    for pag in paginas:
+        texto = pag["texto"]
+        num_pag = pag["pagina"]
 
-        chunks.append({
-            "etiqueta": etiqueta,
-            "texto": etiqueta + "\n" + contenido
-        })
+        partes = PATRON.split(texto)
+
+        if len(partes) <= 1:
+            chunks.append({
+                "titulo": "seccion",
+                "texto": texto,
+                "pagina": num_pag
+            })
+            continue
+
+        for i in range(1, len(partes), 2):
+            titulo = partes[i].strip()
+            contenido = partes[i + 1].strip()
+
+            chunk = f"{titulo}\n{contenido}"
+
+            if len(contenido.split()) < 20:
+                continue
+
+            chunks.append({
+                "titulo": titulo,
+                "texto": chunk,
+                "pagina": num_pag
+            })
 
     return chunks
 
 
 # ============================
-# EXPANSIÓN INTELIGENTE
-# (Capítulo/Sección → +contenido asociado)
-# ============================
-def expandir_chunks(chunks):
-    """Une títulos con su contenido real si no son artículos."""
-    nuevos = []
-    buffer = None
-
-    for ch in chunks:
-        etiqueta = ch["etiqueta"].lower()
-
-        es_articulo = etiqueta.startswith("art")
-
-        if not es_articulo:
-            # Es un título → iniciar buffer
-            if buffer:
-                nuevos.append(buffer)
-            buffer = ch
-        else:
-            # Es artículo → si hay buffer, unirlo antes
-            if buffer:
-                nuevos.append(buffer)
-                buffer = None
-            nuevos.append(ch)
-
-    if buffer:
-        nuevos.append(buffer)
-
-    return nuevos
-
-
-# ============================
-# RECONSTRUCCIÓN COMPLETA
+# RECONSTRUCCIÓN ÍNDICE
 # ============================
 def rebuild_index():
-    print("======================================")
-    print(" RECONSTRUYENDO ÍNDICE HÍBRIDO FCyT")
-    print("======================================")
-
     documentos = []
+
+    print("Buscando PDFs en:", PDF_DIR)
 
     for archivo in os.listdir(PDF_DIR):
         if not archivo.lower().endswith(".pdf"):
             continue
 
         ruta = os.path.join(PDF_DIR, archivo)
-        print(f"\n📄 Procesando PDF: {archivo}")
+        print(f"\nProcesando: {archivo}")
 
-        texto = extraer_texto(ruta)
-        chunks = dividir_por_estructura(texto)
-        chunks = expandir_chunks(chunks)
+        paginas = extraer_paginas(ruta)
+        chunks = dividir_por_articulos(paginas)
 
-        for ch in chunks:
-            etiqueta = ch["etiqueta"]
-
-            articulo = etiqueta if etiqueta.lower().startswith("art") else None
-            cap = etiqueta if etiqueta.lower().startswith(("cap", "sec", "tít")) else None
-
+        for c in chunks:
             documentos.append({
                 "fuente": archivo,
-                "articulo": articulo,
-                "capitulo": cap,
-                "texto": ch["texto"],
-                "texto_normal": normalizar(ch["texto"])
+                "titulo": c["titulo"],
+                "texto": c["texto"],
+                "pagina": c["pagina"],
+                "texto_normal": normalizar(c["texto"])
             })
 
-    print(f"\n🔍 Total de fragmentos estructurales: {len(documentos)}")
+    print(f"\nTotal de fragmentos: {len(documentos)}")
 
     textos_norm = [d["texto_normal"] for d in documentos]
 
     # ============================
     # TF-IDF
     # ============================
-    print("\n⚙ Generando matriz TF-IDF...")
+    print("\nIndexando TF-IDF...")
     vectorizer = TfidfVectorizer(max_features=25000, ngram_range=(1, 2))
     X = vectorizer.fit_transform(textos_norm)
     embeddings_tfidf = X.toarray().astype("float32")
 
-    print("💾 Guardando índice TF-IDF...")
     with open(TFIDF_FILE, "wb") as f:
         pickle.dump({
             "documentos": documentos,
@@ -172,18 +150,18 @@ def rebuild_index():
     # ============================
     # EMBEDDINGS DENSOS
     # ============================
-    print("\n⚙ Generando embeddings densos...")
-    embeddings_dense = embedder.encode(textos_norm, convert_to_numpy=True, show_progress_bar=True)
+    print("\nGenerando embeddings densos...")
+    embeddings_dense = embedder.encode(textos_norm, convert_to_numpy=True)
     np.save(EMB_FILE, embeddings_dense)
 
     # ============================
     # METADATOS
     # ============================
-    print("💾 Guardando metadatos...")
+    print("\nGuardando metadatos...")
     with open(META_FILE, "w", encoding="utf-8") as f:
         json.dump(documentos, f, indent=4, ensure_ascii=False)
 
-    print("\n✔ Índice híbrido generado exitosamente.\n")
+    print("\n✔ Índice generado con éxito (TF-IDF + Dense + Estructura + Páginas).")
 
 
 if __name__ == "__main__":
