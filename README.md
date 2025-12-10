@@ -100,7 +100,7 @@ pypdf
 
 📚 4. Estructura del proyecto
 
-Aquí está la sección que querías agregar correctamente formateada:
+
 
 chatbot-normativo/
 ├─ app.py                # Servidor web + API
