@@ -130,22 +130,23 @@ pypdf
 NLTK
 
 📚 4. Estructura del proyecto
+
 ## 4. Estructura del proyecto
 
 chatbot-normativo/
-├─ app.py                # Servidor web + API
-├─ chatbot.py            # Motor híbrido de búsqueda
-├─ procesar_pdfs.py      # Indexador estructural con embeddings
-├─ index_data/           # Índices TF-IDF + embeddings + metadata
-├─ docs/                 # PDFs normativos
+├─ app.py # Servidor web + API
+├─ chatbot.py # Motor híbrido de búsqueda
+├─ procesar_pdfs.py # Indexador estructural con embeddings
+├─ index_data/ # Índices TF-IDF + embeddings + metadata
+├─ docs/ # PDFs normativos
 ├─ static/
-│   ├─ style.css         # Estilos del chatbot
-│   ├─ admin.css         # Estilos del panel admin
-│   ├─ script.js         # Chat frontend
-│   └─ admin.js          # Panel admin frontend
+│ ├─ style.css # Estilos del chatbot
+│ ├─ admin.css # Estilos del panel admin
+│ ├─ script.js # Chat frontend
+│ └─ admin.js # Panel admin frontend
 └─ templates/
-    ├─ chatbot.html
-    └─ admin.html
+├─ chatbot.html
+└─ admin.html
 
 🏗 5. Procesar los PDFs (generar índices)
 
