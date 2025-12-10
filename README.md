@@ -98,29 +98,9 @@ NLTK
 
 pypdf
 
-📚 4. Estructura del proyecto
 
 
-
-chatbot-normativo/
-├─ app.py                # Servidor web + API
-├─ chatbot.py            # Motor híbrido de búsqueda (TF-IDF + Embeddings + Re-ranking)
-├─ procesar_pdfs.py      # Indexador estructural con detección de artículos y páginas
-├─ index_data/           # Índices TF-IDF, embeddings densos y metadatos
-│   ├─ indice_tfidf.pkl
-│   ├─ embeddings.npy
-│   └─ metadata.json
-├─ docs/                 # PDFs normativos
-├─ static/
-│   ├─ style.css         # Estilos del chatbot web
-│   ├─ admin.css         # Estilos del panel administrativo
-│   ├─ script.js         # Lógica del frontend del chatbot
-│   └─ admin.js          # Lógica del frontend del panel admin
-└─ templates/
-    ├─ chatbot.html      # Interfaz del chatbot
-    └─ admin.html        # Panel administrativo para gestionar PDFs
-
-🏗 5. Procesar los PDFs (generar índices)
+4. Procesar los PDFs (generar índices)
 
 Antes de usar el chatbot:
 
@@ -133,7 +113,7 @@ Archivo	Función
 indice_tfidf.pkl	Vectorizador + matriz TF-IDF
 embeddings.npy	Embeddings densos MiniLM
 metadata.json	Fragmentos, páginas, títulos y fuente
-💬 6. Uso del chatbot en consola
+💬 5. Uso del chatbot en consola
 python chatbot.py
 
 
@@ -143,7 +123,7 @@ Ejemplo:
 Pregunta: ¿Qué es la naturaleza del PFG?
 → Devuelve artículo, página y fragmento original.
 
-🌐 7. Interfaz Web + Panel Administrativo
+🌐 6. Interfaz Web + Panel Administrativo
 
 Iniciar servidor:
 
@@ -174,7 +154,7 @@ Agregar PDF	Sube documento e indexa todo
 Reemplazar PDF	Mantiene el nombre pero actualiza el contenido
 Eliminar PDF	Lo quita del corpus
 Ver PDF	Abre el documento original
-🧪 8. Objetivo académico
+🧪 7. Objetivo académico
 
 El proyecto permite que los estudiantes:
 
@@ -190,7 +170,7 @@ Construyan un buscador legal real y extensible
 
 Mejoren el motor para su examen, TFG o hackathon
 
-🛠 9. Problemas frecuentes
+🛠 8. Problemas frecuentes
 Problema	Solución
 indice_tfidf.pkl no encontrado	Ejecutar python procesar_pdfs.py
 Respuestas incorrectas	PDFs escaneados → requiere OCR
