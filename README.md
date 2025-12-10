@@ -16,102 +16,71 @@ La página donde se encuentra
 
 La fuente del documento
 
-Para esto, el sistema:
+Flujo interno:
 
-1. Carga automáticamente todos los PDFs desde la carpeta docs/.
-2. Extrae el texto completo página por página.
-3. Realiza un chunking estructural inteligente:
+Carga automáticamente todos los PDFs desde la carpeta /docs/.
 
-Identifica automáticamente:
+Extrae el texto completo página por página.
 
-Artículos (“Artículo 5º”)
+Realiza chunking estructural inteligente:
 
-Capítulos (“CAPÍTULO IV”)
+Detecta Capítulos, Artículos, Secciones y Títulos.
 
-Títulos y secciones
+Crea fragmentos alineados al formato jurídico.
 
-Fragmentos insuficientes → descartados
-Esto permite que las respuestas sean precisas y alineadas al formato jurídico.
+Convierte cada fragmento en dos tipos de vectores:
 
-4. Construye dos representaciones vectoriales para cada fragmento:
-   TF-IDF
+TF-IDF → relevancia por palabras.
 
-Mide qué tan relevante es cada palabra dentro de cada fragmento.
+Embeddings MiniLM → comprensión semántica profunda.
 
-Embeddings densos MiniLM
+Búsqueda híbrida + re-ranking semántico y estructural:
 
-Modelo usado:
-paraphrase-multilingual-MiniLM-L12-v2
-Permite comprender el significado, no solo las palabras exactas.
+Combina los mejores resultados de TF-IDF y embeddings.
 
-5. Motor híbrido + re-ranking
+Prioriza artículos y capítulos.
 
-Al recibir una pregunta:
+Penaliza texto desestructurado.
 
-Se calcula similitud TF-IDF.
-
-Se calcula similitud semántica mediante embeddings.
-
-Se combinan candidatos.
-
-Se aplica re-ranking:
-
-Artículos → prioridad alta
-
-Capítulos/Secciones → prioridad media
-
-Texto plano → penalización
-
-Se detecta el tema de la pregunta (PFG, Académico, Investigación, General).
-
-Se priorizan documentos del tipo adecuado.
+Reconoce temas (PFG, Académico, Investigación, General).
 
 Esto garantiza que:
 
-nunca inventa información
+Nunca inventa información
 
-siempre responde con texto real del PDF
+Siempre responde únicamente con texto del PDF
 
-soporta consultas semánticas (“¿qué requisitos hay para presentar el PFG?”)
+Soporta preguntas semánticas, no solo literales
 
-funciona completamente offline una vez creado el índice
+Funciona completamente offline una vez creado el índice
 
 🧩 Requisitos
+
 ✔ Python 3.11 recomendado
+✔ Conexión inicial a Internet para instalar dependencias
 
-Descarga:
+📥 1. Clonar el repositorio
+git clone https://github.com/shirley202/FINAL_GPI.git
+cd fcyt-chatbot-normativo
 
-Windows 64-bit:
-https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe
+🐍 2. Crear y activar entorno virtual
+Windows (PowerShell):
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-Página oficial:
-https://www.python.org/downloads/release/python-3119/
-
-Importante: marcar “Add Python to PATH”.
-
-✔ Conexión a internet
-
-Sólo necesaria la primera vez para descargar dependencias y el modelo MiniLM.
-
-1. Clonar el repositorio
-   git clone https://github.com/shirley202/FINAL_GPI.git
-   cd cd fcyt-chatbot-normativo
-2. Crear y activar el entorno virtual
-   Windows (PowerShell)
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
 
 Si aparece error:
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 
-Linux/macOS
+Linux/macOS:
 python3 -m venv .venv
 source .venv/bin/activate
 
 📦 3. Instalar dependencias
 pip install -r requirements.txt
+
 
 Incluye:
 
@@ -119,51 +88,54 @@ Flask
 
 Sentence-Transformers
 
-PyTorch (CPU/GPU)
+PyTorch
 
 NumPy
 
 Scikit-Learn
 
-pypdf
-
 NLTK
 
+pypdf
+
 📚 4. Estructura del proyecto
-## 4. Estructura del proyecto
+
+Aquí está la sección que querías agregar correctamente formateada:
 
 chatbot-normativo/
 ├─ app.py                # Servidor web + API
-├─ chatbot.py            # Motor híbrido de búsqueda
-├─ procesar_pdfs.py      # Indexador estructural con embeddings
-├─ index_data/           # Índices TF-IDF + embeddings + metadata
+├─ chatbot.py            # Motor híbrido de búsqueda (TF-IDF + Embeddings + Re-ranking)
+├─ procesar_pdfs.py      # Indexador estructural con detección de artículos y páginas
+├─ index_data/           # Índices TF-IDF, embeddings densos y metadatos
+│   ├─ indice_tfidf.pkl
+│   ├─ embeddings.npy
+│   └─ metadata.json
 ├─ docs/                 # PDFs normativos
 ├─ static/
-│   ├─ style.css         # Estilos del chatbot
-│   ├─ admin.css         # Estilos del panel admin
-│   ├─ script.js         # Chat frontend
-│   └─ admin.js          # Panel admin frontend
+│   ├─ style.css         # Estilos del chatbot web
+│   ├─ admin.css         # Estilos del panel administrativo
+│   ├─ script.js         # Lógica del frontend del chatbot
+│   └─ admin.js          # Lógica del frontend del panel admin
 └─ templates/
-    ├─ chatbot.html
-    └─ admin.html
+    ├─ chatbot.html      # Interfaz del chatbot
+    └─ admin.html        # Panel administrativo para gestionar PDFs
 
 🏗 5. Procesar los PDFs (generar índices)
 
-Antes de usar el chatbot, ejecutar:
+Antes de usar el chatbot:
 
 python procesar_pdfs.py
 
+
 Esto genera:
 
-Archivo Función
-indice_tfidf.pkl Vectorizador TF-IDF + matriz TF-IDF
-embeddings.npy Embeddings densos MiniLM
-metadata.json Fragmentos + páginas + títulos
-
-Cada vez que agregues o reemplaces un PDF, se debe reconstruir el índice.
-
-💬 6. Uso del chatbot en modo consola
+Archivo	Función
+indice_tfidf.pkl	Vectorizador + matriz TF-IDF
+embeddings.npy	Embeddings densos MiniLM
+metadata.json	Fragmentos, páginas, títulos y fuente
+💬 6. Uso del chatbot en consola
 python chatbot.py
+
 
 Ejemplo:
 
@@ -173,60 +145,57 @@ Pregunta: ¿Qué es la naturaleza del PFG?
 
 🌐 7. Interfaz Web + Panel Administrativo
 
-Iniciar el servidor:
+Iniciar servidor:
 
 python app.py
 
-Abrir:
+
+Abrir navegador:
 
 http://127.0.0.1:5000/
 
+
 Incluye:
 
-Chatbot Web
+Chatbot Visual
 
-Estilo tipo mensajería
+Interface estilo mensajería
 
-Roles diferenciados (usuario/bot)
+Diferenciación usuario/bot
 
-Fragmentos legales formateados
-
-Enlace a documentos
+Fragmentos legales bien formateados
 
 Panel Administrativo
 
 Permite:
 
-Función Descripción
-Agregar PDF Sube un nuevo documento e indexa todo
-Reemplazar PDF Mantiene nombre → actualiza contenido
-Eliminar PDF Quita del corpus e indexa
-Ver PDF Abre el archivo original
-
-Todo desde el navegador, sin tocar código.
-
+Acción	Descripción
+Agregar PDF	Sube documento e indexa todo
+Reemplazar PDF	Mantiene el nombre pero actualiza el contenido
+Eliminar PDF	Lo quita del corpus
+Ver PDF	Abre el documento original
 🧪 8. Objetivo académico
 
-Este proyecto busca que los estudiantes:
+El proyecto permite que los estudiantes:
 
-Comprendan recuperación de información (IR)
+Comprendan Recuperación de Información (IR)
 
 Trabajen con TF-IDF y embeddings semánticos
 
-Usen chunking estructural basado en artículos
+Implementen chunking jurídico (artículos, capítulos, secciones)
 
-Integren búsquedas híbridas con re-ranking
+Apliquen técnicas de re-ranking híbrido
 
-Gestionen un corpus documental real
+Construyan un buscador legal real y extensible
 
-Modifiquen y extiendan el sistema para prácticas, exámenes o TFG
+Mejoren el motor para su examen, TFG o hackathon
 
 🛠 9. Problemas frecuentes
-Problema Solución
-indice_tfidf.pkl no encontrado Ejecutar python procesar_pdfs.py
-Respuestas incorrectas PDFs escaneados → OCR necesario
-Modelo no carga Verificar instalación de sentence-transformers
-Error en servidor Revisar estructura de carpetas
+Problema	Solución
+indice_tfidf.pkl no encontrado	Ejecutar python procesar_pdfs.py
+Respuestas incorrectas	PDFs escaneados → requiere OCR
+Modelo no carga	Revisar instalación de sentence-transformers
+Error en servidor	Verificar estructura de carpetas
 📄 Licencia
 
 Proyecto educativo de la FCyT–UNCA.
