@@ -44,3 +44,81 @@ button:hover {
 input[type="file"] {
     margin-bottom: 10px;
 }
+/* Contenedor de botones en Acciones */
+td.acciones {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Estilo base */
+.btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: white;
+    min-width: 90px;
+    transition: 0.2s;
+}
+
+/* Ver */
+.btn.ver {
+    background: #0f4c81;
+}
+.btn.ver:hover {
+    background: #0a365c;
+}
+
+/* Reemplazar */
+.btn.reemplazar {
+    background: #e0a106;
+}
+.btn.reemplazar:hover {
+    background: #b88605;
+}
+
+/* Eliminar */
+.btn.eliminar {
+    background: #d9534f;
+}
+.btn.eliminar:hover {
+    background: #b52c27;
+}
+.botones-accion {
+    display: flex;
+    gap: 10px;
+}
+
+.botones-accion .btn {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn.ver { background-color: #3A7AFE; }
+.btn.reemplazar { background-color: #3A7AFE; color: black; }
+.btn.eliminar { background-color: #3A7AFE; }
+.acciones {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+}
+
+.btn.ver { background: #3A7AFE; }
+.btn.reemplazar { background: #3A7AFE; color: white; }
+.btn.eliminar { background: #3A7AFE; }

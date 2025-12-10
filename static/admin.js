@@ -1,12 +1,12 @@
 // =============================================
 // CARGAR LISTA DE DOCUMENTOS
 // =============================================
-async function loadDocs() {
+async function loadDocs() {  
     const res = await fetch("/admin/list");
     const docs = await res.json();
 
     const tbody = document.getElementById("docs-body");
-    tbody.innerHTML = "";
+    tbody.innerHTML = "";   // ← Aquí faltaba un punto y coma
 
     docs.forEach(doc => {
         const row = document.createElement("tr");
@@ -15,10 +15,10 @@ async function loadDocs() {
             <td>${doc.nombre}</td>
             <td>${(doc.tamano / 1024).toFixed(1)} KB</td>
             <td>${new Date(doc.fecha_mod * 1000).toLocaleString()}</td>
-            <td>
-                <button onclick="openPDF('${doc.nombre}')">Ver PDF</button>
-                <button onclick="prepareReplace('${doc.nombre}')">Reemplazar</button>
-                <button onclick="deletePDF('${doc.nombre}')">Eliminar</button>
+            <td class="acciones">
+                <button class="btn ver" onclick="openPDF('${doc.nombre}')">Ver</button>
+                <button class="btn reemplazar" onclick="prepareReplace('${doc.nombre}')">Reemplazar</button>
+                <button class="btn eliminar" onclick="deletePDF('${doc.nombre}')">Eliminar</button>
             </td>
         `;
 
@@ -101,10 +101,7 @@ async function confirmReplace() {
 
     alert("Documento reemplazado y reindexado");
 
-    // Limpiar panel
     cancelReplace();
-
-    // Actualizar lista
     loadDocs();
 }
 

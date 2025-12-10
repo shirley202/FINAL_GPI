@@ -4,13 +4,9 @@ async function sendMessage() {
 
     if (!question) return;
 
-    // Mostrar mensaje del usuario
     appendMessage("user", question);
-
-    // Limpiar input
     input.value = "";
 
-    // Enviar al backend
     const res = await fetch("/ask", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -19,14 +15,23 @@ async function sendMessage() {
 
     const data = await res.json();
 
-    // === Nuevo formato de respuesta ===
+    // Crear tarjeta visual del bot
     const respuesta = `
-        <strong>Artículo:</strong> ${data.articulo}<br>
-        <strong>Fuente:</strong> ${data.fuente}<br>
-        <strong>Página:</strong> ${data.pagina}<br><br>
+        <div class="respuesta-card">
+            <div class="respuesta-header">
+                <strong>${data.articulo}</strong>
+            </div>
 
-        <strong>Fragmento original:</strong><br>
-        ${data.fragmento_original}
+            <div class="respuesta-meta">
+                <p><strong>Fuente:</strong> ${data.fuente}</p>
+                <p><strong>Página:</strong> ${data.pagina}</p>
+                <p><strong>Score:</strong> ${data.score.toFixed(3)}</p>
+            </div>
+
+            <div class="respuesta-fragmento">
+                ${data.fragmento_original}
+            </div>
+        </div>
     `;
 
     appendMessage("bot", respuesta);
@@ -35,10 +40,15 @@ async function sendMessage() {
 function appendMessage(sender, text) {
     const chatWindow = document.getElementById("chat-window");
 
-    const msg = document.createElement("div");
-    msg.className = sender === "user" ? "user-message" : "bot-message";
-    msg.innerHTML = text;
+    const wrapper = document.createElement("div");
+    wrapper.className = sender === "user" ? "msg-user" : "msg-bot";
 
-    chatWindow.appendChild(msg);
+    wrapper.innerHTML = `
+        <div class="bubble">
+            ${text}
+        </div>
+    `;
+
+    chatWindow.appendChild(wrapper);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 }
